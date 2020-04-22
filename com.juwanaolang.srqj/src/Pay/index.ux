@@ -1,0 +1,119 @@
+<template>
+<div class="websrc">
+<div class="item-container">
+<div class="item-container-flex">
+<text class="item_flex color-1" style="flex-grow:1;" onclick="goBack">
+<span class='blackimg iconfont'>&#xe612;</span>
+</text>
+<text class="item_flex color-2" style="flex-grow:5;">{{name}}</text>
+<text class="item_flex color-3" style="flex-grow:1;"  id="menu">
+<span class='menuimg iconfont'>&#xe606;</span>
+</text>
+</div>
+</div>
+<web class="web-page" src="{{websrc}}{{id}}" onerror="onError" onmessage="onMessage"></web>
+
+<popup class="menu" target="menu">
+  <text class="menutitle" onclick="routeHome">返回首页</text>
+  <text class="menutitle" onclick="createShortcut">添加至桌面</text>
+  <text class="menutitle" onclick="routeHelp">帮助？</text>
+  <text class="menutitle" onclick="routeUser">个人中心</text>
+</popup>
+</div>
+</template>
+<style lang="less" src="../Common/style.less">
+</style>
+<script>
+import fetch from '@system.fetch'
+import router from '@system.router'
+import prompt from '@system.prompt'
+import shortcut from '@system.shortcut'
+
+export default {
+      onShow(){
+       APP_STATISTICS.page_show( this );//在onShow方法的第一行加入此代码
+       //App业务代码
+      },
+    onHide() {
+      APP_STATISTICS.page_hide( this ); //在onHide方法的第一行加入此代码
+        //...业务代码
+      },
+    data: {
+    a:1,
+    b:[],
+    id:null,
+    name:'',
+    code:'',
+    datas:'',
+    class:'',
+    items:'',
+    title:'',
+    data:'',
+    websrc:'https://m.taozhuo.com/order/pay.html?id=',
+    type:'',
+    list: [/.*/, "new RegExp('https?.*')"],
+    },
+   onInit() {
+       const self = this;
+       fetch.fetch({
+            url:this.$app.$def.hostUrl+'/getSceneInfo',
+            method:"post",
+            data:{code:this.code}
+        }).then(res => {
+            const result = res.data;
+            console.log(result)
+            if(result.code===200){
+                let response = JSON.parse(result.data);
+                console.log(response)
+                this.data = response.data
+                if(response.data.class.length>0){
+                    this.class = response.data.class;
+                }
+                if(response.data.code.length>0){
+                    this.code = response.data.code;
+                }
+                if(response.data.id.length>0){
+                    this.id = response.data.id;
+                }
+                if(response.data.name.length>0){
+                    this.name = response.data.name;
+                }
+                
+            }
+        }).catch(error => {
+            console.log(error)
+        }) 
+   },
+   onTitleReceive(e) {
+            console.error('onTitleReceive', e.title);
+            this.title = e.title;
+      },
+      onError() {
+            console.info('pageError')
+        },
+        onMessage(e) {
+            console.info('onmessage e = ' + e.message + ", url = " + e.url);
+            this.msg = e.message;
+        },
+    showMenu() {
+    this.$app.$def.showMenu()
+  },
+  goBack() {
+    router.back()
+  },
+    routeHelp () {
+    router.push ({
+      uri: '/Help'
+    })
+  },
+  routeUser () {
+    router.push ({
+      uri: '/User'
+    })
+  },
+    createShortcut () {
+    // 创建快捷方式
+        this.$app.$def.createShortcut()
+    }
+}
+</script>

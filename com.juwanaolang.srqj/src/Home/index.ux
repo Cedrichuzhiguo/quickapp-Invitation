@@ -1,0 +1,104 @@
+<template>
+  <div class='story-container'>
+    <div class="item-container topbox">
+      <div class="item-container-flex">
+        <text class="item_flex htitle iconfont">&#xe641; 生日请柬</text>
+        <text class="item_flex hmenu" id="menu">
+          <span class='iconfont'>&#xe606;</span>
+        </text>
+      </div>
+    </div>
+      <div class='list-item pt100'>
+        <div class='story-main'>
+          <block for="{{ val in datas}}">
+            <div class='story-content' if="showRank" onclick="detail(val.code)">
+              <stack><image class='swipe-image' src='{{ val.thum }}'></image></stack>
+              <text class='swiper-hand-title'>{{ val.name }}</text>
+            </div>
+          </block>
+        </div>
+      </div>
+<popup class="menu" target="menu">
+  <text class="menutitle" onclick="createShortcut">添加至桌面</text>
+  <text class="menutitle" onclick="routeHelp">帮助？</text>
+  <text class="menutitle" onclick="routeUser">个人中心</text>
+</popup>
+</div>
+</template>
+<script>
+import fetch from '@system.fetch'
+import router from '@system.router'
+import prompt from '@system.prompt'
+import shortcut from '@system.shortcut'
+
+export default {
+    onShow(){
+       APP_STATISTICS.page_show( this );//在onShow方法的第一行加入此代码
+       //App业务代码
+      },
+    onHide() {
+      APP_STATISTICS.page_hide( this ); //在onHide方法的第一行加入此代码
+        //...业务代码
+      },
+    data: {
+      showRank: {
+      default: false
+    },
+        id:null,
+        a:1,
+        b:[],
+        name:'',
+        code:'',
+        datas:[],
+        thum:'350x551',
+        rang:[],
+        class:891,
+    },
+   onInit() {
+        this.$page.setTitleBar({text: '生日请柬',textColor: '#1A1A1A'});
+        const self = this;
+        fetch.fetch({
+            url:this.$app.$def.hostUrl+'/lists',
+            method:"post",
+            data:{page:this.page,class:this.class}
+        }).then(res => {
+            const result = res.data;
+            if(result.code===200){
+                let info = JSON.parse(result.data)
+                this.datas = info.data.items
+            }
+        }).catch(error => {
+            console.log(error)
+        })
+   },
+   detail(event){
+        let code = event
+        let rang = this.rang;
+        router.push({
+            uri:'/Detail?id='+code,
+            params:{
+                code:code,
+                rang:rang
+            }
+        })
+    },
+    showMenu() {
+    this.$app.$def.showMenu()
+  },
+  routeHelp () {
+    router.push ({
+      uri: '/Help'
+    })
+  },
+  routeUser () {
+    router.push ({
+      uri: '/User'
+    })
+  },
+  createShortcut () {
+      this.$app.$def.createShortcut()
+  }
+}
+</script>
+<style lang="less" src="../Common/style.less">
+</style>

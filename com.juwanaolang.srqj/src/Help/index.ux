@@ -1,0 +1,79 @@
+<template>
+<div class="websrc">
+<div class="item-container">
+<div class="item-container-flex">
+<text class="item_flex color-1" style="flex-grow:1;" onclick="goBack">
+<span class='blackimg iconfont'>&#xe612;</span>
+</text>
+<text class="item_flex color-2" style="flex-grow:5;">帮助</text>
+<text class="item_flex color-3" style="flex-grow:1;" id="menu">
+<span class='menuimg iconfont'>&#xe606;</span>
+</text>
+</div>
+</div>
+<web class="web-page" src="{{websrc}}" onerror="onError" onmessage="onMessage"></web>
+<popup class="menu" target="menu">
+  <text class="menutitle" onclick="routeHome">返回首页</text>
+  <text class="menutitle" onclick="createShortcut">添加至桌面</text>
+  <text class="menutitle" onclick="routeHelp">帮助？</text>
+  <text class="menutitle" onclick="routeUser">个人中心</text>
+</popup>
+</div>
+</template>
+<style lang="less" src="../Common/style.less">
+</style>
+<script>
+import prompt from '@system.prompt'
+import fetch from '@system.fetch'
+import router from '@system.router'
+import shortcut from '@system.shortcut'
+
+export default {
+      onShow(){
+       APP_STATISTICS.page_show( this );//在onShow方法的第一行加入此代码
+       //App业务代码
+      },
+    onHide() {
+      APP_STATISTICS.page_hide( this ); //在onHide方法的第一行加入此代码
+        //...业务代码
+      },
+    data: {
+    websrc:'https://m.taozhuo.com/help/index.html',
+    a:1,
+    b:[],
+    },
+        onTitleReceive(e) {
+            console.error('onTitleReceive', e.title);
+            this.title = e.title;
+      },
+      onError() {
+            console.info('pageError')
+        },
+        onMessage(e) {
+            console.info('onmessage e = ' + e.message + ", url = " + e.url);
+            this.msg = e.message;
+        },
+    routeHelp () {
+    router.push ({
+      uri: '/Help'
+    })
+  },
+    routeHome () {
+    router.push ({
+      uri: '/Home'
+    })
+  },
+  routeUser () {
+    router.push ({
+      uri: '/User'
+    })
+  },
+  goBack() {
+    router.back()
+  },
+  createShortcut () {
+    // 创建快捷方式
+        this.$app.$def.createShortcut()
+    }
+}
+</script>

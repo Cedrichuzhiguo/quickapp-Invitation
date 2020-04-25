@@ -7,9 +7,14 @@ import "./appStatistics.min.js"
 
 export default {
     onCreate:function(){
-        //统计打点
-          APP_STATISTICS.app_sta_init( this );
+      //统计打点
+      APP_STATISTICS.app_sta_init( this );
         // 其他业务代码...
+      
+      //Refer to: https://doc.quickapp.cn/tutorial/framework/using-async.html
+      const injectRef = Object.getPrototypeOf(global) || global
+      // 注入regeneratorRuntime
+      injectRef.regeneratorRuntime = require('@babel/runtime/regenerator')
       },
   showMenu: util.showMenu,
   createShortcut: util.createShortcut,

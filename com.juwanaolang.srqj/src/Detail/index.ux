@@ -11,7 +11,7 @@
 </text>
 </div>
 </div>
-<web class="web-page" src="{{websrc}}{{code}}?from=yqh&vid={{class}}" onerror="onError" onmessage="onMessage"></web>
+<web class="web-page" src="{{websrc}}{{code}}?from=yqh&vid={{class}}&sessionToken={{sessionToken}}" onerror="onError" onmessage="onMessage" onpagestart="onPageStart"></web>
 <div class="list-left-box">
 <text onclick="listdata">重新挑选</text>
 </div>
@@ -59,6 +59,7 @@ export default {
     list: [/.*/, "new RegExp('https?.*')"],
     },
    onInit() {
+
        const self = this;
        fetch.fetch({
             url:this.$app.$def.hostUrl+'/getSceneInfo',
@@ -135,6 +136,11 @@ export default {
     createShortcut () {
     // 创建快捷方式
         this.$app.$def.createShortcut()
-    }
+    },
+    
+    onPageStart (e) {
+      console.info('### pagestart ###'+e.url)
+    },
+    
 }
 </script>

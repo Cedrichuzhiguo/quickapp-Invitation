@@ -33,7 +33,7 @@ import shortcut from '@system.shortcut'
 
 export default {
     onShow(){
-       APP_STATISTICS.page_show( this );//在onShow方法的第一行加入此代码
+      APP_STATISTICS.page_show( this );//在onShow方法的第一行加入此代码
        //App业务代码
       },
     onHide() {
@@ -42,8 +42,8 @@ export default {
       },
     data: {
       showRank: {
-      default: false
-    },
+        default: false
+        },
         id:null,
         a:1,
         b:[],
@@ -55,33 +55,40 @@ export default {
         class:891,
     },
    onInit() {
-        this.$page.setTitleBar({text: '生日请柬',textColor: '#1A1A1A'});
-        const self = this;
-        fetch.fetch({
-            url:this.$app.$def.hostUrl+'/lists',
-            method:"post",
-            data:{page:this.page,class:this.class}
-        }).then(res => {
-            const result = res.data;
-            if(result.code===200){
-                let info = JSON.parse(result.data)
-                this.datas = info.data.items
-            }
-        }).catch(error => {
-            console.log(error)
-        })
+      this.$page.setTitleBar({text: '生日请柬',textColor: '#1A1A1A'});
+      const self = this;
+      fetch.fetch({
+          url:this.$app.$def.hostUrl+'/lists',
+          method:"post",
+          data:{page:this.page,class:this.class}
+      }).then(res => {
+          const result = res.data;
+          if(result.code===200){
+            let info = JSON.parse(result.data)
+            this.datas = info.data.items
+          }
+      }).catch(error => {
+          console.log(error)
+      })
+
    },
    detail(event){
         let code = event
         let rang = this.rang;
-        router.push({
-            uri:'/Detail?id='+code,
-            params:{
-                code:code,
-                rang:rang
-            }
-        })
+
+
+          router.push({
+              uri:'/Detail?id='+code,
+              params:{
+                  code:code,
+                  rang:rang,
+                  sessionToken: global.userService.Current_Session_Token
+              }
+          })
+
     },
+    
+
     showMenu() {
     this.$app.$def.showMenu()
   },
@@ -91,9 +98,9 @@ export default {
     })
   },
   routeUser () {
-    router.push ({
-      uri: '/User'
-    })
+      router.push ({
+        uri: '/User'
+      })
   },
   createShortcut () {
       this.$app.$def.createShortcut()

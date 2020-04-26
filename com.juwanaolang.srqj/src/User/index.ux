@@ -11,7 +11,7 @@
 </text>
 </div>
 </div>
-<web class="web-page" src="{{websrc}}" onerror="onError" onmessage="onMessage"></web>
+<web class="web-page" src="{{websrc}}" allowthirdpartycookies=true onerror="onError" onmessage="onMessage" onpagestart="onPageStart"></web>
 <popup class="menu" target="menu">
   <text class="menutitle" onclick="routeHome">返回首页</text>
   <text class="menutitle" onclick="createShortcut">添加至桌面</text>
@@ -40,7 +40,10 @@ export default {
     data: {
     a:1,
     b:[],
-    websrc:'https://m.taozhuo.com/xuser/index.html?app=fast',
+    websrc:'https://m.taozhuo.com/xuser/?'+'session='+global.userService.Current_Session_Token,
+    },
+    onInit() {
+        console.log('Page to load: ', this.websrc);
     },
         onTitleReceive(e) {
             console.error('onTitleReceive', e.title);
@@ -74,6 +77,10 @@ export default {
       createShortcut () {
     // 创建快捷方式
         this.$app.$def.createShortcut()
+    },
+
+    onPageStart (e) {
+      console.info('### pagestart ###'+e.url)
     }
 }
 </script>

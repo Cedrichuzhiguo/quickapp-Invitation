@@ -40,7 +40,7 @@ export default {
     data: {
     a:1,
     b:[],
-    websrc:'https://m.taozhuo.com/xuser/?'+'session='+global.userService.Current_Session_Token,
+    websrc:'https://m.taozhuo.com/xuser/?app=fast&'+'session='+global.userService.Current_Session_Token,
     },
     onInit() {
         console.log('Page to load: ', this.websrc);

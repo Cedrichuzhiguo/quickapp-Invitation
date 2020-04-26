@@ -2,7 +2,12 @@ import fetch from '@system.fetch'
 import storage from '@system.storage'
 
 
-const SERVER_END_POINT = "https://m.taozhuo.com/fast/createUser";
+const injectRef = Object.getPrototypeOf(global) || global
+
+// 注入regeneratorRuntime
+injectRef.regeneratorRuntime = require('@babel/runtime/regenerator')
+
+const SERVER_END_POINT = "https://m.taozhuo.com";
 const SERVER_END_POINT_CREATE_USER = `${SERVER_END_POINT}/fast/createUser`;
 const SERVER_END_POINT_LOGIN = `${SERVER_END_POINT}/fast/AjaxLogin`;
 
@@ -10,7 +15,7 @@ class UserTokenService{
 
     constructor(){
         this.storageKey = "userInfo";
-        this.prepareUser();
+        this.currentUserInfo = null ;
     }
 
     async hasInvitations(){
@@ -18,9 +23,9 @@ class UserTokenService{
         return invitations.length>0 ;
     }
 
-    async getToken (){
-        let userInfo = await this.getUserInfo();
-        return userInfo.token || null;
+    async getSessionToken (){
+        let userInfo = await this._getUserInfo();
+        return userInfo.sessionToken || null;
     }
     /** 
      * {
@@ -34,43 +39,48 @@ class UserTokenService{
      * 
     */
     
-    async prepareUser(){
-        let userInfo = await this.getUserInfo();
+    async prepare(){
+        let userInfo = await this._getUserInfo();
         if (userInfo){
-            loginResult = await this.loginUser(userInfo);
+            console.log('Now login user');
+            let loginResult = await this._loginUser(userInfo);
+
             userInfo.sessionToken = loginResult.sessionToken;
             userInfo.user = loginResult.user;
         }else{
-            userInfo = await this.createNewUser();
+            console.log('Now create user.');
+            userInfo = await this._createNewUser();
+            console.log('user info:', userInfo);
             userInfo.invitations = [];
         }
-        await this.saveUserInfo(userInfo);
+        await this._saveUserInfo(userInfo);
+        this.Current_Session_Token = userInfo.sessionToken ;
         return userInfo;
     }
 
-    async getUserInfo(){
+    async _getUserInfo(){
         try{
-            let userInfo = await storage.get(this.storageKey);
-            console.log(`Return userInfo: ${userInfo}`);
+            let storedValue = await storage.get({key: this.storageKey});
+            console.log("Return userInfo from storage:", storedValue);
+            let userInfo = JSON.parse(storedValue.data);
             return userInfo || {};
         }catch(e){
-            console.log(`Cannot get userInfo: ${e}`);
+            console.log(`Cannot get userInfo: ${e.message}`);
             return null;
         }
     }
 
-    async saveUserInfo(userInfo){
-        await storage.set(this.storageKey, userInfo);
+    async _saveUserInfo(userInfo){
+        await storage.set({key: this.storageKey, value: JSON.stringify(userInfo)});
     }
 
 
-    async createNewUser(){
-        const response = await fetch.fetch({
+    async _createNewUser(){
+        const res = await fetch.fetch({
             url: SERVER_END_POINT_CREATE_USER,
             method: 'post'
         });
-        const json = await response.json();
-        console.log(`User creation response: ${json}`);
+
     /**
      * Response example:
      * {
@@ -83,25 +93,38 @@ class UserTokenService{
     }
 }
     */
+        const result = res.data;
+        console.log('result:', result);
+        if(result.code == 200){
+            let json = JSON.parse(result.data);
+            console.log(`User creation response: ${JSON.stringify(json)}`);
 
-        if (json.code == 200 && json.data){
-            return json.data ;
+            if (json.code == 200 && json.data){
+                return json.data ;
+            }
         }
+
         throw 'Create user failed';
     }
 
-    async loginUser({uid, token}){
-        const FormData = require('form-data');
-        const form = new FormData();
-        form.append('uid', uid).append('token', token);
-
-        const response = await fetch.fetch({
+    async _loginUser(userInfo){
+        let {uid, token} = userInfo ;
+        const res = await fetch.fetch({
             url: SERVER_END_POINT_LOGIN,
-            method: 'POST',
-            body: form 
+            method: 'post',
+            data: {uid: uid, token, token} 
         });
-        const json = await response.json();
-        console.log(`User login response: ${json}`);
+        const result = res.data;
+        console.log('result:', result);
+        if(result.code == 200){
+            let json = JSON.parse(result.data);
+            console.log(`User login response: `, json);
+
+            if (json.code == 200 && json.data){
+                console.log('return success login result:', json.data);
+                return json.data;
+            }
+        }
         /**
          * {
     "code": 200,
@@ -115,15 +138,12 @@ class UserTokenService{
     }
 }
          */
-        if (json.code == 200 && json.data){
-            return json.data ;
-        }
         throw 'Login user failed!';
 
     }
 
     async getInvitations(){
-        let userInfo = await this.getUserInfo() || {};
+        let userInfo = await this._getUserInfo() || {};
         return userInfo.invitations || [];
     }
 
@@ -173,4 +193,15 @@ class UserTokenService{
 
 const glb_userTokenService = new UserTokenService();
 
-module.exports = glb_userTokenService;
+
+
+setTimeout(function(){
+    glb_userTokenService.prepare();
+}, 100);
+
+const globalRef = Object.getPrototypeOf(global) || global
+
+globalRef.userService = glb_userTokenService;
+
+
+module.exports = globalRef.userService;

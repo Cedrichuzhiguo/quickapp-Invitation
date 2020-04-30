@@ -140,7 +140,7 @@ export default {
     
     onPageStart (e) {
       console.info('### pagestart ###'+e.url);
-      APP_STATISTICS.track_event('USER_PAGE', e.url);
+      APP_STATISTICS.track_event('TEMPLATE', e.url);
     },
     
 }
